@@ -1,0 +1,165 @@
+-- allium: 3
+-- authorization.allium
+
+-- Scope: Autorizar una instalación de Vera Clipper para depositar capturas en
+--   una Vera concreta con el mínimo poder necesario.
+-- Includes: emparejamiento, credencial de captura, prueba de identidad,
+--   revocación, separación entre instalaciones y visibilidad del acceso.
+-- Excludes:
+--   - credenciales genéricas de agentes y MCP;
+--   - permisos para leer, buscar, editar, mover o borrar el grafo;
+--   - transporte de las capturas (ver delivery.allium);
+--   - identidad en sitios web visitados.
+-- Dependencies: Vera emite y revoca la autoridad local; VERA Conecta puede
+--   comprobar una concesión remota, pero no ampliarla.
+
+------------------------------------------------------------
+-- Contracts
+------------------------------------------------------------
+
+contract AutoridadDeCaptura {
+    comprobar: (prueba: String, instalacion_vera: String) -> Boolean
+    revocar: (concesion: ConcesionDeCaptura) -> Timestamp
+
+    @invariant AlcanceUnico
+        -- La credencial sólo autoriza proponer capturas al depósito gobernado.
+        -- No permite leer, buscar, editar, mover, borrar ni invocar operaciones
+        -- arbitrarias del grafo.
+
+    @invariant UnaVeraNoEsOtra
+        -- La autoridad nombra una instalación Vera concreta y no puede
+        -- presentarse ante otra instalación como si fuera equivalente.
+}
+
+------------------------------------------------------------
+-- Entities and Variants
+------------------------------------------------------------
+
+entity ConcesionDeCaptura {
+    instalacion_clipper: String
+    instalacion_vera: String
+    etiqueta_visible: String
+    estado: pendiente | vigente | revocada | expirada
+    creada_en: Timestamp
+    expira_en: Timestamp?
+    revocada_en: Timestamp when estado = revocada
+
+    transitions estado {
+        pendiente -> vigente
+        pendiente -> expirada
+        vigente -> revocada
+        vigente -> expirada
+        terminal: revocada, expirada
+    }
+}
+
+------------------------------------------------------------
+-- Config
+------------------------------------------------------------
+
+config {
+    vigencia_del_emparejamiento: Duration = 10.minutes
+}
+
+------------------------------------------------------------
+-- Rules
+------------------------------------------------------------
+
+rule IniciarEmparejamiento {
+    when: PersonaPideConectarClipper(instalacion_clipper, instalacion_vera, etiqueta)
+    ensures: ConcesionDeCaptura.created(
+        instalacion_clipper: instalacion_clipper,
+        instalacion_vera: instalacion_vera,
+        etiqueta_visible: etiqueta,
+        estado: pendiente,
+        creada_en: now,
+        expira_en: now + config.vigencia_del_emparejamiento
+    )
+}
+
+rule ConfirmarEmparejamiento {
+    when: PersonaConfirmaConcesion(concesion)
+    requires: concesion.estado = pendiente
+    requires: concesion.expira_en > now
+    ensures:
+        concesion.estado = vigente
+        concesion.expira_en = null
+        CredencialDeCapturaEmitida(concesion)
+}
+
+rule EmparejamientoCaduca {
+    when: concesion: ConcesionDeCaptura.expira_en <= now
+    requires: concesion.estado = pendiente
+    ensures:
+        concesion.estado = expirada
+        concesion.expira_en = null
+}
+
+rule RevocarClipper {
+    when: PersonaRevocaConcesion(concesion)
+    requires: concesion.estado = vigente
+    ensures:
+        concesion.estado = revocada
+        concesion.revocada_en = now
+        CredencialDeCapturaInvalidada(concesion)
+}
+
+------------------------------------------------------------
+-- Actor Declarations
+------------------------------------------------------------
+
+actor PersonaPropietaria {
+    identified_by: ConcesionDeCaptura
+}
+
+actor Clipper {
+    identified_by: ConcesionDeCaptura
+}
+
+actor VeraLocal {
+    identified_by: ConcesionDeCaptura
+}
+
+------------------------------------------------------------
+-- Surfaces
+------------------------------------------------------------
+
+surface ControlDeAccesoDelClipper {
+    facing persona: PersonaPropietaria
+
+    contracts:
+        fulfils AutoridadDeCaptura
+
+    provides:
+        PersonaPideConectarClipper(instalacion_clipper, instalacion_vera, etiqueta)
+        PersonaConfirmaConcesion(concesion)
+        PersonaRevocaConcesion(concesion)
+
+    exposes:
+        ConcesionesDeCaptura
+
+    @guarantee ConsentimientoLocalYRevocable
+        -- Vera muestra qué extensión está conectada y permite retirarla sin
+        -- depender del navegador ni de VERA Conecta.
+}
+
+surface PresentacionDeCredencial {
+    facing clipper: Clipper
+
+    contracts:
+        demands AutoridadDeCaptura
+
+    @guarantee ElSecretoNoApareceEnContenido
+        -- La credencial viaja sólo como prueba de autoridad; nunca se incorpora
+        -- a bloques, bitácoras, diagnósticos ni registros del relay.
+}
+
+------------------------------------------------------------
+-- Open Questions
+------------------------------------------------------------
+
+open question "¿La credencial de captura vence y se refresca, o permanece vigente hasta revocación explícita?"
+
+open question "¿El emparejamiento remoto reutiliza la ceremonia de clientes de VERA Conecta o necesita una ceremonia propia orientada a personas?"
+
+open question "¿Una misma extensión puede conservar varias instalaciones Vera y exigir que la persona escoja destino en cada captura?"

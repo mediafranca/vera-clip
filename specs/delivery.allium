@@ -1,0 +1,218 @@
+-- allium: 3
+-- delivery.allium
+
+-- Scope: Entregar una captura confirmada desde el navegador a la Vera escogida.
+-- Includes: ruta local, ruta mediante VERA Conecta, acuse, idempotencia, cola
+--   privada del dispositivo, reintento y desconexión.
+-- Excludes:
+--   - forma semántica de la captura (ver capture.allium);
+--   - emisión y revocación de credenciales (ver authorization.allium);
+--   - almacenamiento de capturas en VERA Conecta;
+--   - sincronización general entre instalaciones Vera.
+-- Dependencies: VERA Conecta mantiene un canal saliente desde Vera y actúa sólo
+--   como relay; Vera local es la única autoridad que deposita en el grafo.
+
+use "./capture.allium" as capture
+
+------------------------------------------------------------
+-- External Entities
+------------------------------------------------------------
+
+external entity InstalacionVera {
+    id: String
+    disponible_localmente: Boolean
+    disponible_mediante_relay: Boolean
+}
+
+------------------------------------------------------------
+-- Enumerations
+------------------------------------------------------------
+
+enum RutaDeEntrega { local | vera_conecta }
+enum MotivoDeFallo { vera_no_disponible | acceso_retirado | contenido_invalido | demasiado_grande | incompatible }
+
+------------------------------------------------------------
+-- Entities and Variants
+------------------------------------------------------------
+
+entity Entrega {
+    captura: capture/Captura
+    instalacion: InstalacionVera
+    ruta: RutaDeEntrega
+    estado: pendiente | en_vuelo | aceptada | reintentable | rechazada
+    intentos: Integer
+    motivo: MotivoDeFallo when estado = reintentable | rechazada
+    creada_en: Timestamp
+    concluida_en: Timestamp when estado = aceptada | rechazada
+
+    transitions estado {
+        pendiente -> en_vuelo
+        en_vuelo -> aceptada
+        en_vuelo -> reintentable
+        en_vuelo -> rechazada
+        reintentable -> en_vuelo
+        terminal: aceptada, rechazada
+    }
+}
+
+------------------------------------------------------------
+-- Config
+------------------------------------------------------------
+
+config {
+    maximo_de_intentos_automaticos: Integer = 8
+    tamano_maximo_de_captura: Integer = 2_000_000
+}
+
+------------------------------------------------------------
+-- Rules
+------------------------------------------------------------
+
+rule ElegirRutaLocal {
+    when: PersonaEnviaCaptura(captura, instalacion)
+    requires: instalacion.disponible_localmente = true
+    requires: captura.estado = confirmada
+    requires: captura.tamano_en_bytes <= config.tamano_maximo_de_captura
+    ensures: Entrega.created(
+        captura: captura,
+        instalacion: instalacion,
+        ruta: local,
+        estado: pendiente,
+        intentos: 0,
+        creada_en: now
+    )
+}
+
+rule ElegirRutaRemota {
+    when: PersonaEnviaCaptura(captura, instalacion)
+    requires: instalacion.disponible_localmente = false
+    requires: instalacion.disponible_mediante_relay = true
+    requires: captura.estado = confirmada
+    requires: captura.tamano_en_bytes <= config.tamano_maximo_de_captura
+    ensures: Entrega.created(
+        captura: captura,
+        instalacion: instalacion,
+        ruta: vera_conecta,
+        estado: pendiente,
+        intentos: 0,
+        creada_en: now
+    )
+}
+
+rule ComenzarEntrega {
+    when: entrega: Entrega.created
+    requires: entrega.estado = pendiente
+    ensures:
+        entrega.estado = en_vuelo
+        entrega.intentos = entrega.intentos + 1
+}
+
+rule VeraAceptaEntrega {
+    when: VeraDepositaCaptura(entrega, subarbol)
+    requires: entrega.estado = en_vuelo
+    ensures:
+        entrega.estado = aceptada
+        entrega.concluida_en = now
+        capture/EntregaAceptada(entrega.captura, subarbol)
+}
+
+rule AusenciaDeVeraConservaEnElDispositivo {
+    when: EntregaFalla(entrega, vera_no_disponible)
+    requires: entrega.estado = en_vuelo
+    requires: entrega.intentos < config.maximo_de_intentos_automaticos
+    ensures:
+        entrega.estado = reintentable
+        entrega.motivo = vera_no_disponible
+}
+
+rule ReintentarEntrega {
+    when: DispositivoRecuperaConectividad(entrega)
+    requires: entrega.estado = reintentable
+    requires: entrega.intentos < config.maximo_de_intentos_automaticos
+    ensures:
+        entrega.estado = en_vuelo
+        entrega.intentos = entrega.intentos + 1
+}
+
+rule RechazarEntregaDefinitiva {
+    when: EntregaFalla(entrega, motivo)
+    requires: entrega.estado = en_vuelo
+    requires: motivo in {acceso_retirado, contenido_invalido, demasiado_grande, incompatible}
+    ensures:
+        entrega.estado = rechazada
+        entrega.motivo = motivo
+        entrega.concluida_en = now
+}
+
+------------------------------------------------------------
+-- Actor Declarations
+------------------------------------------------------------
+
+actor Persona {
+    identified_by: Entrega
+}
+
+actor DispositivoCapturador {
+    identified_by: Entrega
+}
+
+actor RelayVeraConecta {
+    identified_by: InstalacionVera
+}
+
+actor VeraLocal {
+    identified_by: InstalacionVera
+}
+
+------------------------------------------------------------
+-- Surfaces
+------------------------------------------------------------
+
+surface SalidaDelClipper {
+    facing dispositivo: DispositivoCapturador
+
+    provides:
+        PersonaEnviaCaptura(captura, instalacion)
+        DispositivoRecuperaConectividad(entrega)
+
+    exposes:
+        Entregas
+
+    @guarantee LoPendienteEsVisibleYDescartable
+        -- La persona puede ver y retirar cada captura pendiente. La cola no
+        -- convierte un gesto fallido en una entrega silenciosa e indefinida.
+}
+
+surface EntradaLocalDeVera {
+    facing vera: VeraLocal
+
+    provides:
+        VeraDepositaCaptura(entrega, subarbol)
+        EntregaFalla(entrega, motivo)
+
+    @guarantee VeraEsLaUnicaQueEscribe
+        -- Ni la extensión ni VERA Conecta fabrican bloques canónicos. Sólo Vera
+        -- valida y aplica el depósito contra sus operaciones e invariantes.
+}
+
+surface RelayDeCapturas {
+    facing relay: RelayVeraConecta
+
+    @guarantee TransporteSinRetencion
+        -- El relay autentica, encamina y descarta el sobre después de resolver
+        -- la solicitud. Sus registros operativos no contienen URL ni contenido.
+
+    @guarantee ElRelayNoEsUnaBandeja
+        -- Si Vera no está disponible, la única copia pendiente vive cifrada en
+        -- el dispositivo que inició el gesto; el relay no conserva la captura.
+}
+
+------------------------------------------------------------
+-- Open Questions
+------------------------------------------------------------
+
+open question "¿Después de cuántos intentos una captura deja de reintentarse automáticamente y queda sólo para decisión manual?"
+
+open question "¿Debe preferirse siempre la ruta local cuando ambas rutas están disponibles, o la instalación escogida explícitamente manda sobre la cercanía?"
+
+open question "¿La cola del dispositivo debe cifrarse con una clave ligada al perfil del navegador o basta la protección del almacén de la extensión?"

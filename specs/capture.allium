@@ -1,0 +1,203 @@
+-- allium: 3
+-- capture.allium
+
+-- Scope: Capturar deliberadamente una selección o un artículo web y convertirlo
+--   en un subárbol trazable de la bitácora diaria de Vera.
+-- Includes: preparación, previsualización, confirmación, rechazo, escritura
+--   idempotente, procedencia y reubicación posterior.
+-- Excludes:
+--   - transporte local o remoto (ver delivery.allium);
+--   - credenciales y revocación (ver authorization.allium);
+--   - archivo fiel de una página completa;
+--   - interpretación, resumen, etiquetado o enlace mediante IA;
+--   - estructura interna del grafo y de su historial, gobernada por Vera.
+-- Dependencies: Vera gobierna páginas, bloques, bitácoras, operaciones e
+--   invariantes; la página web es una fuente externa.
+
+------------------------------------------------------------
+-- External Entities
+------------------------------------------------------------
+
+external entity PaginaWeb {
+    url: String
+    titulo: String
+}
+
+external entity BitacoraDiaria {
+    fecha: String
+}
+
+external entity SubarbolDeVera {
+    bitacora: BitacoraDiaria
+}
+
+------------------------------------------------------------
+-- Value Types
+------------------------------------------------------------
+
+value Procedencia {
+    url: String
+    titulo: String
+    capturada_en: Timestamp
+}
+
+------------------------------------------------------------
+-- Contracts
+------------------------------------------------------------
+
+contract DepositoEnBitacora {
+    depositar: (captura: Captura, clave_idempotente: String) -> SubarbolDeVera
+
+    @invariant PrimeroLlegaAlDia
+        -- Toda captura nace en la bitácora correspondiente al día local de la
+        -- persona. Su destino definitivo se decide después mediante las
+        -- operaciones ordinarias de Vera.
+
+    @invariant UnReintentoNoDuplica
+        -- La misma clave idempotente siempre designa el mismo depósito. Una
+        -- confirmación repetida o una respuesta perdida no crea otra copia.
+
+    @invariant LaFuenteNoSeVuelveVozPropia
+        -- El contenido capturado y su procedencia permanecen distinguibles. La
+        -- fecha de captura no se presenta como fecha de autoría de la fuente.
+}
+
+------------------------------------------------------------
+-- Enumerations
+------------------------------------------------------------
+
+enum TipoDeCaptura { seleccion | articulo }
+
+------------------------------------------------------------
+-- Entities and Variants
+------------------------------------------------------------
+
+entity Captura {
+    fuente: PaginaWeb
+    tipo: TipoDeCaptura
+    contenido: String
+    tamano_en_bytes: Integer
+    procedencia: Procedencia
+    estado: preparada | previsualizada | confirmada | descartada | depositada
+    clave_idempotente: String
+    deposito: SubarbolDeVera when estado = depositada
+
+    transitions estado {
+        preparada -> previsualizada
+        previsualizada -> confirmada
+        previsualizada -> descartada
+        confirmada -> depositada
+        terminal: descartada, depositada
+    }
+}
+
+------------------------------------------------------------
+-- Rules
+------------------------------------------------------------
+
+rule PrepararSeleccion {
+    when: PersonaPideCapturarSeleccion(fuente, seleccion, instante)
+    requires: seleccion != ""
+    ensures: Captura.created(
+        fuente: fuente,
+        tipo: seleccion,
+        contenido: seleccion,
+        tamano_en_bytes: bytes(seleccion),
+        procedencia: Procedencia(url: fuente.url, titulo: fuente.titulo, capturada_en: instante),
+        estado: preparada,
+        clave_idempotente: identificador_nuevo()
+    )
+}
+
+rule PrepararArticulo {
+    when: PersonaPideCapturarArticulo(fuente, contenido_legible, instante)
+    requires: contenido_legible != ""
+    ensures: Captura.created(
+        fuente: fuente,
+        tipo: articulo,
+        contenido: contenido_legible,
+        tamano_en_bytes: bytes(contenido_legible),
+        procedencia: Procedencia(url: fuente.url, titulo: fuente.titulo, capturada_en: instante),
+        estado: preparada,
+        clave_idempotente: identificador_nuevo()
+    )
+}
+
+rule MostrarPrevisualizacion {
+    when: captura: Captura.created
+    requires: captura.estado = preparada
+    ensures: captura.estado = previsualizada
+}
+
+rule ConfirmarCaptura {
+    when: PersonaConfirmaCaptura(captura)
+    requires: captura.estado = previsualizada
+    ensures: captura.estado = confirmada
+}
+
+rule DescartarCaptura {
+    when: PersonaDescartaCaptura(captura)
+    requires: captura.estado = previsualizada
+    ensures: captura.estado = descartada
+}
+
+rule DepositarCapturaConfirmada {
+    when: EntregaAceptada(captura, subarbol)
+    requires: captura.estado = confirmada
+    ensures:
+        captura.estado = depositada
+        captura.deposito = subarbol
+}
+
+------------------------------------------------------------
+-- Actor Declarations
+------------------------------------------------------------
+
+actor Persona {
+    identified_by: Captura
+}
+
+actor VeraLocal {
+    identified_by: BitacoraDiaria
+}
+
+------------------------------------------------------------
+-- Surfaces
+------------------------------------------------------------
+
+surface GestoDeCaptura {
+    facing persona: Persona
+
+    exposes:
+        Capturas
+
+    provides:
+        PersonaPideCapturarSeleccion(fuente, seleccion, instante)
+        PersonaPideCapturarArticulo(fuente, contenido_legible, instante)
+        PersonaConfirmaCaptura(captura)
+        PersonaDescartaCaptura(captura)
+
+    @guarantee LaConfirmacionVeLoQueSale
+        -- Antes de enviar, la persona ve el contenido y la procedencia exactos.
+        -- Nada se captura automáticamente al seleccionar o visitar una página.
+}
+
+surface EntradaDeVera {
+    facing vera: VeraLocal
+
+    contracts:
+        demands DepositoEnBitacora
+
+    provides:
+        EntregaAceptada(captura, subarbol)
+}
+
+------------------------------------------------------------
+-- Open Questions
+------------------------------------------------------------
+
+open question "¿La previsualización permite editar el texto antes de enviarlo, y cómo se distingue entonces la selección literal de la nota añadida por la persona?"
+
+open question "¿Una captura de artículo conserva las imágenes remotas, las importa como objetos de Vera o empieza sólo con texto y enlaces?"
+
+open question "¿Al mover el subárbol fuera de la bitácora debe quedar allí un enlace de procedencia hacia su destino nuevo?"
