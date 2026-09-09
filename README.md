@@ -30,6 +30,10 @@ como pregunta de diseño: no debe confundirse una nota legible con una custodia
 forense de recursos, scripts y versiones.
 
 Safari y otros navegadores WebKit quedan fuera del primer corte.
+La distribución es directa, mediante dos paquetes —Chromium y Firefox—, sin
+publicación en tiendas. El paquete Firefox deberá firmarse como unlisted por
+Mozilla para instalarse en versiones estables, pero se distribuirá por medios
+propios.
 
 ## Especificaciones
 
@@ -52,7 +56,8 @@ npm run check
 
 Durante el desarrollo, `npm run dev` abre el destino Chromium y
 `npm run dev:firefox` abre Firefox. Las compilaciones de producción se generan
-con `npm run build` y `npm run build:firefox`.
+con `npm run build` y `npm run build:firefox`; los dos paquetes de distribución
+directa, con `npm run package` y `npm run package:firefox`.
 
 ## Licencia prevista
 

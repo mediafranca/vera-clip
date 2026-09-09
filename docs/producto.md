@@ -15,6 +15,14 @@ resuelven en adaptadores de plataforma y no reducen esa paridad funcional.
 
 Safari y otros navegadores WebKit quedan fuera del MVP.
 
+## Distribución
+
+Vera Clip no se publica en tiendas de extensiones. El proyecto entrega por
+medios propios dos paquetes: uno Chromium MV3 para Chrome, Edge y Brave, y uno
+Firefox. Firefox estable exige que Mozilla firme incluso las extensiones
+autodistribuidas; esa firma se obtiene en el canal unlisted de AMO, sin ficha
+pública ni distribución mediante su catálogo.
+
 ## Recorrido principal
 
 1. La persona selecciona texto o pide capturar el artículo legible.

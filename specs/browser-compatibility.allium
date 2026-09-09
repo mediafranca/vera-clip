@@ -4,7 +4,7 @@
 -- Scope: Garantizar el mismo recorrido esencial de Vera Clip en Chrome, Edge,
 -- Brave y Firefox.
 -- Includes: navegadores admitidos, instalación disponible y paridad funcional.
--- Excludes: distribución en tiendas, versiones mínimas y Safari/WebKit.
+-- Excludes: versiones mínimas y Safari/WebKit.
 
 ------------------------------------------------------------
 -- Enumerations
@@ -26,6 +26,7 @@ entity DistribucionDeExtension {
     previsualizacion: Boolean
     entrega: Boolean
     gestion_de_pendientes: Boolean
+    canal: directa
 
     recorrido_esencial_completo:
         instalable
@@ -54,6 +55,7 @@ rule PublicarDistribucionAdmitida {
         previsualizacion: true,
         entrega: true,
         gestion_de_pendientes: true
+        canal: directa
     )
 }
 
@@ -97,6 +99,13 @@ surface PublicacionDeExtension {
         -- Una persona puede capturar, revisar, enviar y gestionar pendientes
         -- del mismo modo en Chrome, Edge, Brave y Firefox. Las diferencias de
         -- manifiesto o APIs no eliminan capacidades del recorrido esencial.
+
+    @guarantee SinDependenciaDeTiendas
+        -- El proyecto produce dos paquetes instalables directamente: uno para
+        -- Chromium y otro para Firefox. Ninguno se publica ni se descubre en
+        -- Chrome Web Store, Edge Add-ons o el catálogo público de AMO. La firma
+        -- unlisted que Firefox estable exige no convierte AMO en canal de
+        -- distribución: el XPI firmado se entrega por medios propios.
 }
 
 ------------------------------------------------------------
@@ -104,5 +113,3 @@ surface PublicacionDeExtension {
 ------------------------------------------------------------
 
 open question "¿Qué versiones mínimas de Chrome, Edge, Brave y Firefox se sostendrán en el primer lanzamiento?"
-
-open question "¿La distribución inicial será mediante tiendas oficiales, instalación manual firmada o ambas?"
