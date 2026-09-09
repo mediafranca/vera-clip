@@ -1,0 +1,108 @@
+-- allium: 3
+-- browser-compatibility.allium
+--
+-- Scope: Garantizar el mismo recorrido esencial de Vera Clip en Chrome, Edge,
+-- Brave y Firefox.
+-- Includes: navegadores admitidos, instalación disponible y paridad funcional.
+-- Excludes: distribución en tiendas, versiones mínimas y Safari/WebKit.
+
+------------------------------------------------------------
+-- Enumerations
+------------------------------------------------------------
+
+enum NavegadorAdmitido { chrome | edge | brave | firefox }
+enum MotorDeNavegador { chromium | gecko }
+
+------------------------------------------------------------
+-- Entities and Variants
+------------------------------------------------------------
+
+entity DistribucionDeExtension {
+    navegador: NavegadorAdmitido
+    motor: MotorDeNavegador
+    instalable: Boolean
+    captura_seleccion: Boolean
+    captura_articulo: Boolean
+    previsualizacion: Boolean
+    entrega: Boolean
+    gestion_de_pendientes: Boolean
+
+    recorrido_esencial_completo:
+        instalable
+        and captura_seleccion
+        and captura_articulo
+        and previsualizacion
+        and entrega
+        and gestion_de_pendientes
+}
+
+------------------------------------------------------------
+-- Rules
+------------------------------------------------------------
+
+rule PublicarDistribucionAdmitida {
+    when: EquipoPublicaExtension(navegador, motor)
+    requires: navegador in {chrome, edge, brave, firefox}
+    requires: navegador in {chrome, edge, brave} implies motor = chromium
+    requires: navegador = firefox implies motor = gecko
+    ensures: DistribucionDeExtension.created(
+        navegador: navegador,
+        motor: motor,
+        instalable: true,
+        captura_seleccion: true,
+        captura_articulo: true,
+        previsualizacion: true,
+        entrega: true,
+        gestion_de_pendientes: true
+    )
+}
+
+------------------------------------------------------------
+-- Invariants
+------------------------------------------------------------
+
+invariant ParidadDelRecorridoEsencial {
+    DistribucionesDeExtension.all(d => d.recorrido_esencial_completo)
+}
+
+invariant MotorCorrespondeAlNavegador {
+    DistribucionesDeExtension.all(d =>
+        (d.navegador in {chrome, edge, brave} implies d.motor = chromium)
+        and (d.navegador = firefox implies d.motor = gecko)
+    )
+}
+
+------------------------------------------------------------
+-- Actor Declarations
+------------------------------------------------------------
+
+actor EquipoDeVeraClip {
+    identified_by: DistribucionDeExtension
+}
+
+------------------------------------------------------------
+-- Surfaces
+------------------------------------------------------------
+
+surface PublicacionDeExtension {
+    facing equipo: EquipoDeVeraClip
+
+    provides:
+        EquipoPublicaExtension(navegador, motor)
+
+    exposes:
+        DistribucionesDeExtension
+
+    @guarantee MismosGestosEsenciales
+        -- Una persona puede capturar, revisar, enviar y gestionar pendientes
+        -- del mismo modo en Chrome, Edge, Brave y Firefox. Las diferencias de
+        -- manifiesto o APIs no eliminan capacidades del recorrido esencial.
+}
+
+------------------------------------------------------------
+-- Open Questions
+------------------------------------------------------------
+
+open question "¿Qué versiones mínimas de Chrome, Edge, Brave y Firefox se sostendrán en el primer lanzamiento?"
+
+open question "¿La distribución inicial será mediante tiendas oficiales, instalación manual firmada o ambas?"

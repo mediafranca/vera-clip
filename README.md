@@ -12,6 +12,8 @@ implementados.
 
 El primer corte especificado cubre:
 
+- extensiones WebExtensions para Chrome, Edge y Brave sobre Chromium, y para
+  Firefox;
 - selección de texto y artículo legible;
 - previsualización antes de enviar;
 - entrega directa a Vera local o remota mediante
@@ -24,6 +26,8 @@ Archivar una página completa como copia fiel queda fuera del MVP y se conserva
 como pregunta de diseño: no debe confundirse una nota legible con una custodia
 forense de recursos, scripts y versiones.
 
+Safari y otros navegadores WebKit quedan fuera del primer corte.
+
 ## Especificaciones
 
 1. [`specs/capture.allium`](specs/capture.allium): qué se captura y cómo nace en
@@ -32,6 +36,8 @@ forense de recursos, scripts y versiones.
    reintentos y ausencia de almacenamiento en VERA Conecta.
 3. [`specs/authorization.allium`](specs/authorization.allium): emparejamiento,
    alcance mínimo, revocación y límites de exposición.
+4. [`specs/browser-compatibility.allium`](specs/browser-compatibility.allium):
+   navegadores admitidos y paridad funcional del MVP.
 
 Validación:
 

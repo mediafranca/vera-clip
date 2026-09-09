@@ -5,6 +5,16 @@ memoria. No organiza automáticamente el grafo ni decide el destino definitivo:
 deposita una captura trazable en la bitácora del día y deja la ordinatio para
 después.
 
+## Navegadores del primer corte
+
+Vera Clip se distribuye como extensión WebExtensions para Chrome, Edge y Brave
+sobre Chromium, y para Firefox. Los cuatro navegadores ofrecen el mismo
+recorrido esencial: capturar selección o artículo, previsualizar, confirmar,
+entregar y administrar pendientes. Las diferencias de manifiesto y APIs se
+resuelven en adaptadores de plataforma y no reducen esa paridad funcional.
+
+Safari y otros navegadores WebKit quedan fuera del MVP.
+
 ## Recorrido principal
 
 1. La persona selecciona texto o pide capturar el artículo legible.
