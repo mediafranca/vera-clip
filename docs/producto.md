@@ -23,6 +23,12 @@ Firefox. Firefox estable exige que Mozilla firme incluso las extensiones
 autodistribuidas; esa firma se obtiene en el canal unlisted de AMO, sin ficha
 pública ni distribución mediante su catálogo.
 
+La página pública de Vera enlaza una página breve de Vera Clip que explica esta
+decisión, ofrece instrucciones separadas para Chromium y Firefox y descarga los
+artefactos de la publicación más reciente desde GitHub Releases. Los nombres de
+archivo permanecen estables para que el enlace `releases/latest/download`
+siempre resuelva a la versión vigente.
+
 ## Recorrido principal
 
 1. La persona selecciona texto o pide capturar el artículo legible.

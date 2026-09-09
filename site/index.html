@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Descarga e instala Vera Clip para Chromium o Firefox.">
+  <title>Vera Clip — Lleva la web a tu memoria</title>
+  <style>
+    :root{color-scheme:light;--ink:#24231f;--muted:#68645b;--paper:#f4f1e9;--card:#fff;--line:#d8d1c3;--accent:#315e47;--accent2:#e5efe8;font:17px/1.55 system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}main{max-width:960px;margin:auto;padding:64px 24px 96px}header{max-width:720px;margin-bottom:52px}.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.18em;color:var(--accent)}h1,h2{font-family:Georgia,serif;line-height:1.1}h1{font-size:clamp(2.6rem,8vw,5.2rem);margin:.15em 0}h2{font-size:1.6rem;margin-top:0}.lead{font-size:1.2rem;color:var(--muted)}.downloads{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}.card,.why{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px}.button{display:inline-block;margin-top:12px;padding:12px 18px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;font-weight:700}.button:focus-visible,a:focus-visible{outline:3px solid #cf9737;outline-offset:3px}.meta{font-size:.88rem;color:var(--muted)}ol{padding-left:1.4em}li+li{margin-top:.55em}.why{margin-top:24px;background:var(--accent2)}footer{margin-top:42px;color:var(--muted);font-size:.94rem}footer a{color:var(--accent)}code{font-size:.9em}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">VERA CLIP</p>
+    <h1>Lleva la web a tu memoria.</h1>
+    <p class="lead">Captura una selección o un artículo legible y envíalo a tu propia instalación de Vera, conservando la fuente y sin entregar acceso de lectura a tu grafo.</p>
+  </header>
+
+  <section class="downloads" aria-label="Descargas e instalación">
+    <article class="card">
+      <h2>Chrome, Edge y Brave</h2>
+      <p>Un solo paquete Chromium MV3 para los tres navegadores.</p>
+      <a class="button" href="https://github.com/mediafranca/vera-clip/releases/latest/download/vera-clip-chromium.zip">Descargar para Chromium</a>
+      <ol>
+        <li>Descomprime el archivo descargado.</li>
+        <li>Abre <code>chrome://extensions</code>, <code>edge://extensions</code> o <code>brave://extensions</code>.</li>
+        <li>Activa el modo para desarrolladores.</li>
+        <li>Elige «Cargar descomprimida» y selecciona la carpeta.</li>
+      </ol>
+    </article>
+
+    <article class="card">
+      <h2>Firefox</h2>
+      <p>Paquete XPI firmado por Mozilla para autodistribución, sin publicación en AMO.</p>
+      <a class="button" href="https://github.com/mediafranca/vera-clip/releases/latest/download/vera-clip-firefox.xpi">Descargar para Firefox</a>
+      <ol>
+        <li>Descarga el archivo <code>.xpi</code>.</li>
+        <li>Abre Complementos y temas.</li>
+        <li>En el menú del engranaje, elige «Instalar complemento desde archivo».</li>
+        <li>Selecciona el XPI y confirma los permisos.</li>
+      </ol>
+    </article>
+  </section>
+
+  <section class="why">
+    <h2>¿Por qué no está en una tienda?</h2>
+    <p>Vera es infraestructura personal y soberana. Preferimos que el código, los artefactos y su historial sean inspeccionables en el proyecto, sin convertir una tienda comercial en intermediaria de la instalación. Firefox exige una firma de Mozilla para funcionar en su versión estable; la obtenemos de forma privada como extensión no listada, pero distribuimos el archivo nosotros.</p>
+    <p class="meta">Antes de instalar, el navegador mostrará los permisos necesarios para leer sólo el contenido que decides capturar y comunicarse con Vera.</p>
+  </section>
+
+  <footer>
+    <a href="https://github.com/mediafranca/vera-clip">Código fuente y versiones</a>
+    · Vera Clip es software libre y forma parte del ecosistema de Vera.
+  </footer>
+</main>
+</body>
+</html>

@@ -35,6 +35,11 @@ publicación en tiendas. El paquete Firefox deberá firmarse como unlisted por
 Mozilla para instalarse en versiones estables, pero se distribuirá por medios
 propios.
 
+El prototipo autocontenido de la página pública vive en
+[`site/index.html`](site/index.html). Sus descargas apuntan a los nombres
+estables de GitHub Releases: `vera-clip-chromium.zip` y
+`vera-clip-firefox.xpi`.
+
 ## Especificaciones
 
 1. [`specs/capture.allium`](specs/capture.allium): qué se captura y cómo nace en

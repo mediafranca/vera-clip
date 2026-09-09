@@ -37,6 +37,23 @@ entity DistribucionDeExtension {
         and gestion_de_pendientes
 }
 
+entity PaginaDeDescarga {
+    explica_ausencia_de_tiendas: Boolean
+    ofrece_chromium_actual: Boolean
+    ofrece_firefox_actual: Boolean
+    instrucciones_chromium: Boolean
+    instrucciones_firefox: Boolean
+    enlaza_codigo_fuente: Boolean
+
+    completa:
+        explica_ausencia_de_tiendas
+        and ofrece_chromium_actual
+        and ofrece_firefox_actual
+        and instrucciones_chromium
+        and instrucciones_firefox
+        and enlaza_codigo_fuente
+}
+
 ------------------------------------------------------------
 -- Rules
 ------------------------------------------------------------
@@ -59,6 +76,18 @@ rule PublicarDistribucionAdmitida {
     )
 }
 
+rule PublicarPaginaDeDescarga {
+    when: EquipoPublicaPaginaDeDescarga()
+    ensures: PaginaDeDescarga.created(
+        explica_ausencia_de_tiendas: true,
+        ofrece_chromium_actual: true,
+        ofrece_firefox_actual: true,
+        instrucciones_chromium: true,
+        instrucciones_firefox: true,
+        enlaza_codigo_fuente: true
+    )
+}
+
 ------------------------------------------------------------
 -- Invariants
 ------------------------------------------------------------
@@ -72,6 +101,10 @@ invariant MotorCorrespondeAlNavegador {
         (d.navegador in {chrome, edge, brave} implies d.motor = chromium)
         and (d.navegador = firefox implies d.motor = gecko)
     )
+}
+
+invariant TodaPaginaDeDescargaEsCompleta {
+    PaginasDeDescarga.all(p => p.completa)
 }
 
 ------------------------------------------------------------
@@ -91,9 +124,11 @@ surface PublicacionDeExtension {
 
     provides:
         EquipoPublicaExtension(navegador, motor)
+        EquipoPublicaPaginaDeDescarga()
 
     exposes:
         DistribucionesDeExtension
+        PaginasDeDescarga
 
     @guarantee MismosGestosEsenciales
         -- Una persona puede capturar, revisar, enviar y gestionar pendientes
@@ -106,6 +141,11 @@ surface PublicacionDeExtension {
         -- Chrome Web Store, Edge Add-ons o el catálogo público de AMO. La firma
         -- unlisted que Firefox estable exige no convierte AMO en canal de
         -- distribución: el XPI firmado se entrega por medios propios.
+
+    @guarantee DescargaVerificableYActual
+        -- La página pública explica la decisión, enseña a instalar cada
+        -- paquete y enlaza los artefactos de la publicación más reciente en
+        -- GitHub Releases junto con el código fuente.
 }
 
 ------------------------------------------------------------
