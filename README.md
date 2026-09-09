@@ -7,8 +7,11 @@ puede reubicarse después como un subárbol sin perder identidad ni historia.
 
 ## Estado
 
-Repositorio de especificación. Todavía no hay extensión ni endpoints
-implementados.
+Primer corte ejecutable en desarrollo. Ya existen compilaciones WebExtensions
+para Chromium y Firefox, captura por menú contextual, extracción de selección o
+artículo legible, previsualización y cola local cuando Vera no responde. El
+endpoint `/captures`, la autorización y la entrega mediante Vera Conecta aún no
+están implementados extremo a extremo.
 
 El primer corte especificado cubre:
 
@@ -43,7 +46,13 @@ Validación:
 
 ```sh
 allium check specs/*.allium
+npm install
+npm run check
 ```
+
+Durante el desarrollo, `npm run dev` abre el destino Chromium y
+`npm run dev:firefox` abre Firefox. Las compilaciones de producción se generan
+con `npm run build` y `npm run build:firefox`.
 
 ## Licencia prevista
 

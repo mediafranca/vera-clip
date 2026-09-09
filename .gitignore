@@ -1,5 +1,6 @@
 .DS_Store
 dist/
+.output/
+.wxt/
 node_modules/
 web-ext-artifacts/
-
