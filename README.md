@@ -1,6 +1,6 @@
-# Vera Clipper
+# Vera Clip
 
-Vera Clipper será una extensión libre para incorporar al grafo de
+Vera Clip será una extensión libre para incorporar al grafo de
 [Vera](https://github.com/mediafranca/vera) lo que una persona encuentra en la
 web. Toda captura llega primero a la bitácora del día, conserva su procedencia y
 puede reubicarse después como un subárbol sin perder identidad ni historia.
@@ -43,4 +43,3 @@ allium check specs/*.allium
 
 GNU AGPLv3, coherente con Vera y VERA Conecta. Se añadirá el texto de licencia
 antes del primer código distribuible.
-

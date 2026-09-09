@@ -1,7 +1,7 @@
 -- allium: 3
 -- authorization.allium
 
--- Scope: Autorizar una instalación de Vera Clipper para depositar capturas en
+-- Scope: Autorizar una instalación de Vera Clip para depositar capturas en
 --   una Vera concreta con el mínimo poder necesario.
 -- Includes: emparejamiento, credencial de captura, prueba de identidad,
 --   revocación, separación entre instalaciones y visibilidad del acceso.

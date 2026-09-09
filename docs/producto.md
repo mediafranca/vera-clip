@@ -1,6 +1,6 @@
 # Corte inicial de producto
 
-Vera Clipper reduce la distancia entre encontrar algo y hacerlo parte de la
+Vera Clip reduce la distancia entre encontrar algo y hacerlo parte de la
 memoria. No organiza automáticamente el grafo ni decide el destino definitivo:
 deposita una captura trazable en la bitácora del día y deja la ordinatio para
 después.
@@ -30,4 +30,3 @@ autoría de la fuente.
 - lectura o búsqueda del corpus desde la extensión;
 - archivo fiel de páginas completas;
 - captura de contenido inaccesible para la persona o prohibido por el navegador.
-
