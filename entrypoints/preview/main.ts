@@ -1,6 +1,6 @@
 import { confirmDraft } from '../../lib/domain';
-import { deliverLocally } from '../../lib/delivery';
-import { discardPreview, getPreview, queuePending } from '../../lib/storage';
+import { deliverLocally, deliverRemotely } from '../../lib/delivery';
+import { discardPreview, getPreview, getRemoteDelivery, queuePending } from '../../lib/storage';
 import './style.css';
 
 const source = document.querySelector<HTMLParagraphElement>('#source')!;
@@ -34,6 +34,16 @@ confirm.addEventListener('click', async () => {
       return;
     }
   } catch { /* Vera local no está disponible: conservar abajo. */ }
+  const remote = await getRemoteDelivery();
+  if (remote) {
+    try {
+      if (await deliverRemotely(pending, remote)) {
+        status.textContent = 'Guardado en Vera mediante Vera Conecta.';
+        await discardPreview();
+        return;
+      }
+    } catch { /* El relay tampoco está disponible: conservar abajo. */ }
+  }
   await queuePending(pending);
   status.textContent = 'Vera no está disponible. La captura quedó pendiente en este navegador.';
 });

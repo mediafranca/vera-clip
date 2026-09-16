@@ -1,7 +1,9 @@
 import type { CaptureDraft } from './domain';
+import type { RemoteDelivery } from './delivery';
 
 const CURRENT = 'currentCapture';
 const PENDING = 'pendingCaptures';
+const REMOTE = 'remoteDelivery';
 
 export async function savePreview(draft: CaptureDraft): Promise<void> {
   await browser.storage.local.set({ [CURRENT]: draft });
@@ -21,4 +23,8 @@ export async function queuePending(draft: CaptureDraft): Promise<void> {
   const unique = pending.filter(item => item.id !== draft.id);
   await browser.storage.local.set({ [PENDING]: [...unique, draft] });
   await discardPreview();
+}
+
+export async function getRemoteDelivery(): Promise<RemoteDelivery | undefined> {
+  return (await browser.storage.local.get(REMOTE))[REMOTE] as RemoteDelivery | undefined;
 }

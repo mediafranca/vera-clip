@@ -9,9 +9,10 @@ puede reubicarse después como un subárbol sin perder identidad ni historia.
 
 Primer corte ejecutable en desarrollo. Ya existen compilaciones WebExtensions
 para Chromium y Firefox, captura por menú contextual, extracción de selección o
-artículo legible, previsualización y cola local cuando Vera no responde. El
-endpoint `/captures`, la autorización y la entrega mediante Vera Conecta aún no
-están implementados extremo a extremo.
+artículo legible, previsualización y cola local cuando Vera no responde. La
+extensión ya puede entregar el mismo sobre idempotente directamente o mediante
+el endpoint estrecho de Vera Conecta. Falta la interfaz de emparejamiento y la
+puerta canónica `/captures` de Vera para completar el recorrido real.
 
 El primer corte especificado cubre:
 
