@@ -180,6 +180,15 @@ surface GestoDeCaptura {
     @guarantee LaConfirmacionVeLoQueSale
         -- Antes de enviar, la persona ve el contenido y la procedencia exactos.
         -- Nada se captura automáticamente al seleccionar o visitar una página.
+
+    @guarantee DosEntradasUnMismoGesto
+        -- La persona puede iniciar la captura desde el botón permanente del
+        -- navegador o desde el menú contextual. Ambos accesos preparan la misma
+        -- previsualización gobernada; ninguno deposita sin confirmación.
+
+    @guarantee LaConfirmacionPerteneceAVera
+        -- La previsualización usa la jerarquía, tipografía, color y controles
+        -- de Vera; no se presenta como una aplicación visualmente ajena.
 }
 
 surface EntradaDeVera {

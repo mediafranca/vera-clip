@@ -6,7 +6,7 @@ export default defineContentScript({
   main() {
     browser.runtime.onMessage.addListener(async message => {
       if (message?.type === 'extract-selection') {
-        return { content: window.getSelection()?.toString() ?? '' };
+        return { content: window.getSelection()?.toString() ?? '', title: document.title };
       }
       if (message?.type === 'extract-article') {
         const article = new Readability(document.cloneNode(true) as Document).parse();

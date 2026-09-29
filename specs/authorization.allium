@@ -53,6 +53,18 @@ entity ConcesionDeCaptura {
     }
 }
 
+entity DestinoConfigurado {
+    relay_url: String
+    instalacion_vera: String
+    credencial_presente: Boolean
+    estado: vigente | retirado
+
+    transitions estado {
+        vigente -> retirado
+        terminal: retirado
+    }
+}
+
 ------------------------------------------------------------
 -- Config
 ------------------------------------------------------------
@@ -104,6 +116,25 @@ rule RevocarClipper {
         CredencialDeCapturaInvalidada(concesion)
 }
 
+rule ConfigurarDestinoDelClipper {
+    when: PersonaConfiguraDestino(relay_url, instalacion_vera, credencial_presente)
+    requires: relay_url != ""
+    requires: instalacion_vera != ""
+    requires: credencial_presente = true
+    ensures: DestinoConfigurado.created(
+        relay_url: relay_url,
+        instalacion_vera: instalacion_vera,
+        credencial_presente: true,
+        estado: vigente
+    )
+}
+
+rule OlvidarDestinoDelClipper {
+    when: PersonaOlvidaDestino(destino)
+    requires: destino.estado = vigente
+    ensures: destino.estado = retirado
+}
+
 ------------------------------------------------------------
 -- Actor Declarations
 ------------------------------------------------------------
@@ -152,6 +183,22 @@ surface PresentacionDeCredencial {
     @guarantee ElSecretoNoApareceEnContenido
         -- La credencial viaja sólo como prueba de autoridad; nunca se incorpora
         -- a bloques, bitácoras, diagnósticos ni registros del relay.
+}
+
+surface ConfiguracionDelClipper {
+    facing persona: PersonaPropietaria
+
+    provides:
+        PersonaConfiguraDestino(relay_url, instalacion_vera, credencial_presente)
+        PersonaOlvidaDestino(destino)
+
+    exposes:
+        DestinosConfigurados
+
+    @guarantee ConfiguracionPrivadaYReemplazable
+        -- El destino y su autoridad se guardan en el almacén privado de la
+        -- extensión, nunca en el código, una página visitada o una captura. La
+        -- persona puede reemplazarlos u olvidarlos desde la propia extensión.
 }
 
 ------------------------------------------------------------

@@ -11,6 +11,7 @@
     "build:firefox": "wxt build -b firefox",
     "package": "wxt zip",
     "package:firefox": "wxt zip -b firefox",
+    "package:all": "npm run package && npm run package:firefox",
     "check": "tsc --noEmit && vitest run && npm run build && npm run build:firefox"
   },
   "dependencies": {

@@ -8,6 +8,7 @@ const content = document.querySelector<HTMLTextAreaElement>('#content')!;
 const status = document.querySelector<HTMLParagraphElement>('#status')!;
 const confirm = document.querySelector<HTMLButtonElement>('#confirm')!;
 const discard = document.querySelector<HTMLButtonElement>('#discard')!;
+const configure = document.querySelector<HTMLButtonElement>('#configure')!;
 const draft = await getPreview();
 
 if (!draft) {
@@ -22,6 +23,8 @@ discard.addEventListener('click', async () => {
   await discardPreview();
   window.close();
 });
+
+configure.addEventListener('click', () => void browser.runtime.openOptionsPage());
 
 confirm.addEventListener('click', async () => {
   if (!draft) return;
@@ -46,4 +49,5 @@ confirm.addEventListener('click', async () => {
   }
   await queuePending(pending);
   status.textContent = 'Vera no está disponible. La captura quedó pendiente en este navegador.';
+  configure.dataset.visible = 'true';
 });

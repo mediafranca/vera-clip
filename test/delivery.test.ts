@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { deliverLocally, deliverRemotely } from '../lib/delivery';
 import type { CaptureDraft } from '../lib/domain';
+import { normalizeRemoteDelivery } from '../lib/config';
 
 const draft: CaptureDraft = {
   id: 'stable-capture',
@@ -43,5 +44,32 @@ describe('capture delivery', () => {
       }),
     ]);
     expect(JSON.parse(String(calls[0]?.[1]?.body))).toMatchObject({ idempotencyKey: 'stable-capture' });
+  });
+});
+
+describe('remote destination configuration', () => {
+  it('normalizes the governed relay target', () => {
+    const target = normalizeRemoteDelivery({
+      baseUrl: ' https://conecta.mediafranca.net/ ',
+      installationId: ' vera-1 ',
+      credential: ' capture-secret ',
+    });
+    expect(target).toEqual({
+      baseUrl: 'https://conecta.mediafranca.net',
+      installationId: 'vera-1',
+      credential: 'capture-secret',
+    });
+  });
+
+  it('rejects an insecure remote relay', () => {
+    expect(() => normalizeRemoteDelivery({
+      baseUrl: 'http://conecta.example', installationId: 'vera-1', credential: 'secret',
+    })).toThrow('insecure_relay_url');
+  });
+
+  it('rejects an ungoverned relay even when it uses HTTPS', () => {
+    expect(() => normalizeRemoteDelivery({
+      baseUrl: 'https://another-relay.example', installationId: 'vera-1', credential: 'secret',
+    })).toThrow('unsupported_relay_url');
   });
 });

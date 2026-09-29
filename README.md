@@ -8,11 +8,11 @@ puede reubicarse después como un subárbol sin perder identidad ni historia.
 ## Estado
 
 Primer corte ejecutable en desarrollo. Ya existen compilaciones WebExtensions
-para Chromium y Firefox, captura por menú contextual, extracción de selección o
-artículo legible, previsualización y cola local cuando Vera no responde. La
-extensión ya puede entregar el mismo sobre idempotente directamente o mediante
-el endpoint estrecho de Vera Conecta. Falta la interfaz de emparejamiento y la
-puerta canónica `/captures` de Vera para completar el recorrido real.
+para Chromium y Firefox, botón permanente del navegador, captura por menú
+contextual, extracción de selección o artículo legible, previsualización y cola
+local cuando Vera no responde. La extensión entrega el mismo sobre idempotente a
+Vera local o al endpoint estrecho de Vera Conecta. El destino remoto se configura
+desde la propia extensión y la puerta canónica `POST /captures` ya existe en Vera.
 
 El primer corte especificado cubre:
 
@@ -37,9 +37,11 @@ Mozilla para instalarse en versiones estables, pero se distribuirá por medios
 propios.
 
 El prototipo autocontenido de la página pública vive en
-[`site/index.html`](site/index.html). Sus descargas apuntan a los nombres
-estables de GitHub Releases: `vera-clip-chromium.zip` y
-`vera-clip-firefox.xpi`.
+[`site/index.html`](site/index.html). Sus descargas anticipan los nombres de la
+distribución pública futura: `vera-clip-chromium.zip` y
+`vera-clip-firefox.xpi`. Mientras no exista una release firmada, los artefactos
+locales de desarrollo son los que genera `npm run package:all` dentro de
+`dist/`; el ZIP de Firefox no sustituye al XPI firmado.
 
 ## Especificaciones
 
@@ -52,18 +54,60 @@ estables de GitHub Releases: `vera-clip-chromium.zip` y
 4. [`specs/browser-compatibility.allium`](specs/browser-compatibility.allium):
    navegadores admitidos y paridad funcional del MVP.
 
-Validación:
+## Compilar y probar
+
+La salida deliberadamente visible vive en `dist/`; `.output/` ya no se usa. Para
+generar los dos árboles cargables y ejecutar todas las comprobaciones:
 
 ```sh
 allium check specs/*.allium
-npm install
+npm ci
 npm run check
 ```
 
-Durante el desarrollo, `npm run dev` abre el destino Chromium y
-`npm run dev:firefox` abre Firefox. Las compilaciones de producción se generan
-con `npm run build` y `npm run build:firefox`; los dos paquetes de distribución
-directa, con `npm run package` y `npm run package:firefox`.
+El resultado es:
+
+- `dist/chrome-mv3/`: extensión Chromium descomprimida;
+- `dist/firefox-mv2/`: extensión Firefox/Zen descomprimida.
+
+Para generar además los paquetes con nombres estables:
+
+```sh
+npm run package:all
+```
+
+Eso deja `dist/vera-clip-chrome.zip`, `dist/vera-clip-firefox.zip` y el paquete
+de fuentes requerido por Firefox. El ZIP de Firefox aún no está firmado: no es
+un XPI instalable de forma permanente en Firefox o Zen estable.
+
+## Probar en Zen o Firefox
+
+1. Ejecuta `npm ci && npm run build:firefox`.
+2. Abre `about:debugging#/runtime/this-firefox`.
+3. Pulsa **Cargar complemento temporal**.
+4. Selecciona `dist/firefox-mv2/manifest.json`.
+
+La extensión permanece cargada hasta cerrar el navegador. El botón de Vera Clip
+aparece en la barra —puede estar dentro del menú de extensiones— y ofrece
+**Capturar selección**, **Capturar artículo** y **Configurar destino**. El menú
+contextual conserva las dos capturas.
+
+## Configurar Vera remota
+
+Desde **Configurar destino**, guarda:
+
+1. la dirección de Vera Conecta;
+2. el identificador público de la instalación Vera;
+3. una credencial limitada al alcance `capture`.
+
+La extensión sólo tiene autoridad de red sobre Vera local y el relay gobernado
+`conecta.mediafranca.net`; una URL arbitraria se rechaza aunque use HTTPS. La
+credencial queda en el almacén privado de la extensión, no en el repositorio ni
+en las capturas. Vera Clip intenta primero `127.0.0.1:4173`; si esa Vera local no
+responde, usa el destino remoto configurado.
+
+Durante el desarrollo, `npm run dev` abre Chromium y `npm run dev:firefox` abre
+Firefox.
 
 ## Licencia prevista
 

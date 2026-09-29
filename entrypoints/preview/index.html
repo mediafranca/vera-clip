@@ -1,5 +1,18 @@
 <!doctype html>
 <html lang="es">
   <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vera Clip</title></head>
-  <body><main><p class="eyebrow">VERA CLIP</p><h1>Revisar captura</h1><p id="source"></p><textarea id="content" readonly></textarea><p id="status" role="status"></p><footer><button id="discard" class="quiet">Descartar</button><button id="confirm">Guardar en Vera</button></footer></main><script type="module" src="./main.ts"></script></body>
+  <body>
+    <header class="topbar"><strong>Vera</strong><span>Clip</span></header>
+    <main>
+      <p class="eyebrow">CAPTURA WEB</p>
+      <h1>Revisar antes de guardar</h1>
+      <p id="source" class="source"></p>
+      <label for="content">Contenido</label>
+      <textarea id="content" readonly></textarea>
+      <p id="status" role="status"></p>
+      <button id="configure" class="text-action" type="button">Configurar destino remoto</button>
+      <footer><button id="discard" class="quiet">Descartar</button><button id="confirm">Guardar en Vera</button></footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
 </html>

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+  <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Configurar Vera Clip</title></head>
+  <body>
+    <header class="topbar"><strong>Vera</strong><span>Clip</span></header>
+    <main>
+      <p class="eyebrow">CONFIGURACIÓN</p>
+      <h1>Destino de las capturas</h1>
+      <p class="lede">Vera Clip intenta primero la Vera local. Si no está disponible, usa esta instalación mediante Vera Conecta.</p>
+      <form id="remote">
+        <label>Dirección de Vera Conecta<input id="base-url" name="baseUrl" type="url" value="https://conecta.mediafranca.net" required></label>
+        <label>Identificador de la instalación<input id="installation-id" name="installationId" autocomplete="off" required></label>
+        <label>Credencial de captura<input id="credential" name="credential" type="password" autocomplete="off" required></label>
+        <p class="note">La credencial se guarda en el almacén privado de esta extensión y sólo autoriza capturas.</p>
+        <p id="status" role="status"></p>
+        <footer><button id="forget" class="quiet" type="button">Olvidar destino</button><button type="submit">Guardar configuración</button></footer>
+      </form>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

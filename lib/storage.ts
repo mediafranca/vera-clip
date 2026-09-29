@@ -28,3 +28,11 @@ export async function queuePending(draft: CaptureDraft): Promise<void> {
 export async function getRemoteDelivery(): Promise<RemoteDelivery | undefined> {
   return (await browser.storage.local.get(REMOTE))[REMOTE] as RemoteDelivery | undefined;
 }
+
+export async function saveRemoteDelivery(target: RemoteDelivery): Promise<void> {
+  await browser.storage.local.set({ [REMOTE]: target });
+}
+
+export async function clearRemoteDelivery(): Promise<void> {
+  await browser.storage.local.remove(REMOTE);
+}

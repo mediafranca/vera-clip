@@ -39,6 +39,16 @@ siempre resuelva a la versión vigente.
 5. Vera encuentra o crea la bitácora del día y añade un solo subárbol de captura.
 6. La extensión confirma el destino; un reintento nunca duplica la captura.
 
+El gesto puede comenzar desde el botón permanente de Vera Clip en la barra del
+navegador o desde el menú contextual. Ambos caminos desembocan en la misma
+previsualización, que usa la gramática visual de Vera y nunca deposita sin una
+confirmación explícita.
+
+La instalación remota se configura desde la extensión con la dirección del
+relay, el identificador público de Vera y una credencial de alcance exclusivo
+`capture`. El secreto permanece en el almacén privado del navegador y puede
+olvidarse desde la misma superficie.
+
 ## Forma inicial en Vera
 
 El bloque raíz nombra la página fuente y enlaza su URL. Sus hijos distinguen el

@@ -26,6 +26,8 @@ entity DistribucionDeExtension {
     previsualizacion: Boolean
     entrega: Boolean
     gestion_de_pendientes: Boolean
+    boton_del_navegador: Boolean
+    menu_contextual: Boolean
     canal: directa
 
     recorrido_esencial_completo:
@@ -35,6 +37,8 @@ entity DistribucionDeExtension {
         and previsualizacion
         and entrega
         and gestion_de_pendientes
+        and boton_del_navegador
+        and menu_contextual
 }
 
 entity PaginaDeDescarga {
@@ -72,6 +76,8 @@ rule PublicarDistribucionAdmitida {
         previsualizacion: true,
         entrega: true,
         gestion_de_pendientes: true
+        boton_del_navegador: true
+        menu_contextual: true
         canal: directa
     )
 }
