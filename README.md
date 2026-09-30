@@ -80,17 +80,70 @@ Eso deja `dist/vera-clip-chrome.zip`, `dist/vera-clip-firefox.zip` y el paquete
 de fuentes requerido por Firefox. El ZIP de Firefox aún no está firmado: no es
 un XPI instalable de forma permanente en Firefox o Zen estable.
 
-## Probar en Zen o Firefox
+## Instalar la extensión
 
-1. Ejecuta `npm ci && npm run build:firefox`.
-2. Abre `about:debugging#/runtime/this-firefox`.
-3. Pulsa **Cargar complemento temporal**.
-4. Selecciona `dist/firefox-mv2/manifest.json`.
+Necesitas una copia compilada: `npm ci`, luego `npm run build` (Chromium) y
+`npm run build:firefox` (Firefox/Zen). Los árboles quedan en `dist/chrome-mv3/`
+y `dist/firefox-mv2/`; `npm run package:all` genera además los ZIP.
 
-La extensión permanece cargada hasta cerrar el navegador. El botón de Vera Clip
-aparece en la barra —puede estar dentro del menú de extensiones— y ofrece
-**Capturar selección**, **Capturar artículo** y **Configurar destino**. El menú
-contextual conserva las dos capturas.
+### Chrome, Edge, Brave, Opera y Vivaldi (Chromium)
+
+1. Abre la página de extensiones: `chrome://extensions`, `edge://extensions`,
+   `brave://extensions`, `opera://extensions` o `vivaldi://extensions`.
+2. Activa **Modo de desarrollador**.
+3. Pulsa **Cargar descomprimida** y elige la **carpeta** `dist/chrome-mv3/`
+   (no el `manifest.json` ni un ZIP: estos navegadores no instalan ZIP sin
+   firmar).
+4. Fija el botón desde el menú de extensiones (icono de pieza de puzle).
+
+La extensión permanece instalada entre sesiones. Tras recompilar, pulsa el
+botón de recarga de su tarjeta.
+
+### Firefox, Zen y otros derivados de Firefox
+
+Firefox estable sólo instala de forma permanente extensiones firmadas por
+Mozilla; el ZIP de `npm run package:firefox` no lo está. Hay tres caminos:
+
+**A. Temporal (cualquier Firefox o Zen).** Dura hasta cerrar el navegador.
+
+1. Abre `about:debugging#/runtime/this-firefox`.
+2. Pulsa **Cargar complemento temporal…**.
+3. Elige el archivo `dist/firefox-mv2/manifest.json`. Si el selector no te
+   deja marcarlo (ocurre en Zen y en macOS), pega la ruta con `Cmd+Shift+G` o
+   elige en su lugar `dist/vera-clip-firefox.zip`: este cargador también acepta
+   ZIP y XPI.
+4. Tras recompilar, pulsa **Recargar** en la misma tarjeta.
+
+**B. Permanente sin firmar (Zen, Firefox Developer Edition, Nightly, ESR).**
+Estas ediciones permiten desactivar la verificación de firma; Firefox estable
+ignora el ajuste.
+
+1. En `about:config` pon `xpinstall.signatures.required` en `false`.
+2. Abre `about:addons`, pulsa el engranaje → **Instalar complemento desde
+   archivo…** y elige `dist/vera-clip-firefox.zip`.
+
+**C. Firmada (cualquier Firefox estable).** Sube el paquete como *unlisted* en
+el portal de Mozilla para obtener un XPI firmado, e instálalo como en B. Es la
+vía prevista para la distribución pública.
+
+Para probar en un perfil aislado, `npm run dev:firefox` abre Firefox con la
+extensión cargada y recarga en caliente.
+
+### Safari
+
+Fuera del primer corte.
+
+### Después de instalar
+
+El botón de Vera Clip aparece en la barra —puede estar dentro del menú de
+extensiones— y ofrece **Capturar selección**, **Capturar artículo** y
+**Configurar destino**. El menú contextual conserva las dos capturas.
+
+Si al enviar la consola muestra `CORS Missing Allow Origin` hacia
+`127.0.0.1:4173`, el navegador no concedió el permiso de red de la extensión:
+quita la extensión y vuelve a cargarla desde una compilación reciente, y en
+`about:addons` → Vera Clip → **Permisos** comprueba que el acceso a
+`127.0.0.1` esté activo.
 
 ## Configurar Vera remota
 
