@@ -29,6 +29,23 @@ contract AutoridadDeCaptura {
     @invariant UnaVeraNoEsOtra
         -- La autoridad nombra una instalación Vera concreta y no puede
         -- presentarse ante otra instalación como si fuera equivalente.
+
+    @invariant LaHerramientaNoEsOtraAutoria
+        -- La credencial demuestra qué instalación de Vera Clip ejecutó el
+        -- depósito, pero no convierte a la extensión en autora ni en un
+        -- participante aparte. La persona propietaria sigue siendo quien
+        -- incorpora; el canal permanece import porque las palabras vienen de
+        -- la fuente citada y no de la herramienta que las transportó.
+
+    @invariant LaAutoridadLocalNoNecesitaRelay
+        -- Cuando Vera Clip y Vera Desktop están en el mismo equipo, la
+        -- concesión se presenta directamente ante Vera local. VERA Conecta no
+        -- interviene en la emisión, comprobación ni revocación de ese acceso.
+
+    @invariant VigenteHastaRevocacion
+        -- Una concesión confirmada permanece vigente hasta que la persona la
+        -- revoca. No puede caducar silenciosamente y dejar capturas acumuladas
+        -- en un cliente que no implementa renovación.
 }
 
 ------------------------------------------------------------
@@ -204,8 +221,6 @@ surface ConfiguracionDelClipper {
 ------------------------------------------------------------
 -- Open Questions
 ------------------------------------------------------------
-
-open question "¿La credencial de captura vence y se refresca, o permanece vigente hasta revocación explícita?"
 
 open question "¿El emparejamiento remoto reutiliza la ceremonia de clientes de VERA Conecta o necesita una ceremonia propia orientada a personas?"
 

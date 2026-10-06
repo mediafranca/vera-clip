@@ -1,8 +1,9 @@
 import type { CaptureDraft } from './domain';
-import type { RemoteDelivery } from './delivery';
+import type { LocalDelivery, RemoteDelivery } from './delivery';
 
 const CURRENT = 'currentCapture';
 const PENDING = 'pendingCaptures';
+const LOCAL = 'localDelivery';
 const REMOTE = 'remoteDelivery';
 
 export async function savePreview(draft: CaptureDraft): Promise<void> {
@@ -27,6 +28,18 @@ export async function queuePending(draft: CaptureDraft): Promise<void> {
 
 export async function getRemoteDelivery(): Promise<RemoteDelivery | undefined> {
   return (await browser.storage.local.get(REMOTE))[REMOTE] as RemoteDelivery | undefined;
+}
+
+export async function getLocalDelivery(): Promise<LocalDelivery | undefined> {
+  return (await browser.storage.local.get(LOCAL))[LOCAL] as LocalDelivery | undefined;
+}
+
+export async function saveLocalDelivery(target: LocalDelivery): Promise<void> {
+  await browser.storage.local.set({ [LOCAL]: target });
+}
+
+export async function clearLocalDelivery(): Promise<void> {
+  await browser.storage.local.remove(LOCAL);
 }
 
 export async function saveRemoteDelivery(target: RemoteDelivery): Promise<void> {

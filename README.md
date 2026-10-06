@@ -11,8 +11,10 @@ Primer corte ejecutable en desarrollo. Ya existen compilaciones WebExtensions
 para Chromium y Firefox, botón permanente del navegador, captura por menú
 contextual, extracción de selección o artículo legible, previsualización y cola
 local cuando Vera no responde. La extensión entrega el mismo sobre idempotente a
-Vera local o al endpoint estrecho de Vera Conecta. El destino remoto se configura
-desde la propia extensión y la puerta canónica `POST /captures` ya existe en Vera.
+Vera local o al endpoint estrecho de Vera Conecta. La ruta local exige una
+capacidad delegada y conserva a la persona propietaria como autora de la
+incorporación; el destino remoto se configura aparte como respaldo. La puerta
+canónica `POST /captures` ya existe en Vera.
 
 El primer corte especificado cubre:
 
@@ -145,7 +147,19 @@ quita la extensión y vuelve a cargarla desde una compilación reciente, y en
 `about:addons` → Vera Clip → **Permisos** comprueba que el acceso a
 `127.0.0.1` esté activo.
 
-## Configurar Vera remota
+## Configurar la Vera local
+
+1. En Vera abre **MCP → Capturas** y pulsa **autorizar Vera Clip**.
+2. Copia el bloque de autorización que Vera muestra una sola vez.
+3. En **Configurar destino** de la extensión, pégalo bajo **Esta Vera local**.
+
+La capacidad sólo permite `POST /captures`: no abre páginas, búsqueda ni
+operaciones generales. Vera Clip no se convierte en otro participante. Cada
+captura se atribuye a la persona propietaria por el canal `import`, con la URL y
+la fecha de la fuente. Para retirar una instalación, olvida su autorización en
+la extensión y revoca la credencial en Vera.
+
+## Configurar un respaldo remoto
 
 Desde **Configurar destino**, guarda:
 
@@ -155,9 +169,10 @@ Desde **Configurar destino**, guarda:
 
 La extensión sólo tiene autoridad de red sobre Vera local y el relay gobernado
 `conecta.mediafranca.net`; una URL arbitraria se rechaza aunque use HTTPS. La
-credencial queda en el almacén privado de la extensión, no en el repositorio ni
-en las capturas. Vera Clip intenta primero `127.0.0.1:4173`; si esa Vera local no
-responde, usa el destino remoto configurado.
+credenciales quedan en el almacén privado de la extensión, no en el repositorio
+ni en las capturas. Vera Clip intenta primero la ruta local **autenticada**; si
+no está configurada o esa Vera no responde, usa el respaldo remoto. Si tampoco
+responde, conserva la captura en su cola privada.
 
 Durante el desarrollo, `npm run dev` abre Chromium y `npm run dev:firefox` abre
 Firefox.

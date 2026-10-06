@@ -6,7 +6,20 @@
     <main>
       <p class="eyebrow">CONFIGURACIÓN</p>
       <h1>Destino de las capturas</h1>
-      <p class="lede">Vera Clip intenta primero la Vera local. Si no está disponible, usa esta instalación mediante Vera Conecta.</p>
+      <p class="lede">Vera Clip intenta primero tu Vera local. Sólo usa Vera Conecta cuando configuraste también un respaldo remoto.</p>
+      <section>
+        <h2>Esta Vera local</h2>
+        <p>Pide una autorización en <strong>Vera → MCP → Capturas</strong> y pega aquí el bloque completo. La selección viaja sólo dentro de este equipo y se incorpora como tuya, por el canal de importación.</p>
+        <form id="local">
+          <label>Autorización de Vera Clip<textarea id="local-authorization" name="localAuthorization" rows="7" spellcheck="false" autocomplete="off" required></textarea></label>
+          <p class="note">Esta capacidad sólo abre la puerta de captura: no permite leer el grafo ni ejecutar otras operaciones.</p>
+          <p id="local-status" role="status"></p>
+          <footer><button id="forget-local" class="quiet" type="button">Olvidar autorización</button><button type="submit">Guardar autorización</button></footer>
+        </form>
+      </section>
+      <section>
+        <h2>Respaldo remoto opcional</h2>
+        <p>Úsalo si capturas desde un navegador que no comparte equipo con Vera Desktop. Conecta sólo transporta el sobre hasta tu Vera local.</p>
       <form id="remote">
         <label>Dirección de Vera Conecta<input id="base-url" name="baseUrl" type="url" value="https://conecta.mediafranca.net" required></label>
         <label>Identificador de la instalación<input id="installation-id" name="installationId" autocomplete="off" required></label>
@@ -15,6 +28,7 @@
         <p id="status" role="status"></p>
         <footer><button id="forget" class="quiet" type="button">Olvidar destino</button><button type="submit">Guardar configuración</button></footer>
       </form>
+      </section>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

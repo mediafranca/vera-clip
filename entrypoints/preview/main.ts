@@ -1,6 +1,12 @@
 import { confirmDraft } from '../../lib/domain';
 import { deliverLocally, deliverRemotely } from '../../lib/delivery';
-import { discardPreview, getPreview, getRemoteDelivery, queuePending } from '../../lib/storage';
+import {
+  discardPreview,
+  getLocalDelivery,
+  getPreview,
+  getRemoteDelivery,
+  queuePending,
+} from '../../lib/storage';
 import './style.css';
 
 const source = document.querySelector<HTMLParagraphElement>('#source')!;
@@ -30,13 +36,16 @@ confirm.addEventListener('click', async () => {
   if (!draft) return;
   confirm.disabled = true;
   const pending = confirmDraft(draft);
-  try {
-    if (await deliverLocally(pending)) {
-      status.textContent = 'Guardado en Vera.';
-      await discardPreview();
-      return;
-    }
-  } catch { /* Vera local no está disponible: conservar abajo. */ }
+  const local = await getLocalDelivery();
+  if (local) {
+    try {
+      if (await deliverLocally(pending, local)) {
+        status.textContent = 'Guardado directamente en tu Vera local.';
+        await discardPreview();
+        return;
+      }
+    } catch { /* Vera local no está disponible: conservar abajo. */ }
+  }
   const remote = await getRemoteDelivery();
   if (remote) {
     try {

@@ -34,8 +34,9 @@ siempre resuelva a la versión vigente.
 1. La persona selecciona texto o pide capturar el artículo legible.
 2. La extensión muestra exactamente qué contenido y procedencia enviará.
 3. La persona confirma.
-4. La extensión intenta primero la Vera local configurada; cuando el dispositivo
-   está asociado por VERA Conecta, puede usar la ruta remota correspondiente.
+4. La extensión intenta primero la Vera local autorizada; cuando el navegador
+   está en otro equipo o la ruta local no responde, puede usar VERA Conecta como
+   respaldo configurado.
 5. Vera encuentra o crea la bitácora del día y añade un solo subárbol de captura.
 6. La extensión confirma el destino; un reintento nunca duplica la captura.
 
@@ -44,10 +45,16 @@ navegador o desde el menú contextual. Ambos caminos desembocan en la misma
 previsualización, que usa la gramática visual de Vera y nunca deposita sin una
 confirmación explícita.
 
-La instalación remota se configura desde la extensión con la dirección del
-relay, el identificador público de Vera y una credencial de alcance exclusivo
-`capture`. El secreto permanece en el almacén privado del navegador y puede
+La autorización local nace en Vera y se copia una sola vez a la extensión. Está
+ligada a la persona propietaria y tiene alcance exclusivo `capture`: identifica
+la herramienta técnica sin convertirla en otro autor. El material se registra
+por el canal `import`. La instalación remota se configura por separado con la
+dirección del relay, el identificador público de Vera y otra credencial de
+captura. Ambos secretos permanecen en el almacén privado del navegador y pueden
 olvidarse desde la misma superficie.
+
+La Vera local es la autoridad en ambos recorridos. VERA Conecta transporta el
+sobre cuando hace falta, pero no constituye una copia central del grafo.
 
 ## Forma inicial en Vera
 

@@ -181,6 +181,11 @@ surface SalidaDelClipper {
     @guarantee LoPendienteEsVisibleYDescartable
         -- La persona puede ver y retirar cada captura pendiente. La cola no
         -- convierte un gesto fallido en una entrega silenciosa e indefinida.
+
+    @guarantee LaRutaLocalTienePrioridad
+        -- Cuando la Vera escogida corre en el mismo equipo, la captura entra
+        -- directamente por localhost. El relay sólo se intenta cuando esa Vera
+        -- local no está disponible y existe una concesión remota configurada.
 }
 
 surface EntradaLocalDeVera {
@@ -212,7 +217,5 @@ surface RelayDeCapturas {
 ------------------------------------------------------------
 
 open question "¿Después de cuántos intentos una captura deja de reintentarse automáticamente y queda sólo para decisión manual?"
-
-open question "¿Debe preferirse siempre la ruta local cuando ambas rutas están disponibles, o la instalación escogida explícitamente manda sobre la cercanía?"
 
 open question "¿La cola del dispositivo debe cifrarse con una clave ligada al perfil del navegador o basta la protección del almacén de la extensión?"

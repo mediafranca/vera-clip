@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { deliverLocally, deliverRemotely } from '../lib/delivery';
 import type { CaptureDraft } from '../lib/domain';
-import { normalizeRemoteDelivery } from '../lib/config';
+import { normalizeLocalDelivery, normalizeRemoteDelivery } from '../lib/config';
 
 const draft: CaptureDraft = {
   id: 'stable-capture',
@@ -20,7 +20,21 @@ describe('capture delivery', () => {
       calls.push([input, init]);
       return new Response(null, { status: 202 });
     };
-    await expect(deliverLocally(draft, fetcher)).resolves.toBe(true);
+    await expect(deliverLocally(draft, {
+      baseUrl: 'http://127.0.0.1:4173',
+      client: 'vera-clip',
+      credential: 'local-capture-secret',
+    }, fetcher)).resolves.toBe(true);
+    expect(calls[0]).toEqual([
+      'http://127.0.0.1:4173/captures',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          authorization: 'Bearer local-capture-secret',
+          'x-vera-client': 'vera-clip',
+        }),
+      }),
+    ]);
     expect(JSON.parse(String(calls[0]?.[1]?.body))).toMatchObject({ idempotencyKey: 'stable-capture' });
   });
 
@@ -44,6 +58,26 @@ describe('capture delivery', () => {
       }),
     ]);
     expect(JSON.parse(String(calls[0]?.[1]?.body))).toMatchObject({ idempotencyKey: 'stable-capture' });
+  });
+});
+
+describe('local destination configuration', () => {
+  it('accepts only the local Vera and trims the delegated capability', () => {
+    expect(normalizeLocalDelivery({
+      baseUrl: ' http://127.0.0.1:4173/ ',
+      client: ' vera-clip ',
+      credential: ' local-secret ',
+    })).toEqual({
+      baseUrl: 'http://127.0.0.1:4173',
+      client: 'vera-clip',
+      credential: 'local-secret',
+    });
+  });
+
+  it('does not turn a pasted URL into authority over another Vera', () => {
+    expect(() => normalizeLocalDelivery({
+      baseUrl: 'https://vera.example', client: 'vera-clip', credential: 'secret',
+    })).toThrow('unsupported_local_url');
   });
 });
 

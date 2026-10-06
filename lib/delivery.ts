@@ -6,6 +6,12 @@ export interface RemoteDelivery {
   credential: string;
 }
 
+export interface LocalDelivery {
+  baseUrl: string;
+  client: string;
+  credential: string;
+}
+
 type Fetcher = typeof fetch;
 
 function envelope(draft: CaptureDraft): Record<string, string> {
@@ -19,10 +25,18 @@ function envelope(draft: CaptureDraft): Record<string, string> {
   };
 }
 
-export async function deliverLocally(draft: CaptureDraft, fetcher: Fetcher = fetch): Promise<boolean> {
-  const response = await fetcher('http://127.0.0.1:4173/captures', {
+export async function deliverLocally(
+  draft: CaptureDraft,
+  target: LocalDelivery,
+  fetcher: Fetcher = fetch,
+): Promise<boolean> {
+  const response = await fetcher(`${target.baseUrl.replace(/\/$/, '')}/captures`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      authorization: `Bearer ${target.credential}`,
+      'content-type': 'application/json',
+      'x-vera-client': target.client,
+    },
     body: JSON.stringify(envelope(draft)),
   });
   return response.ok;
