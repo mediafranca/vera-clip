@@ -1,19 +1,25 @@
 import type { LocalDelivery, RemoteDelivery } from './delivery';
 
 const GOVERNED_RELAY = 'https://conecta.mediafranca.net';
-const LOCAL_VERA = 'http://127.0.0.1:4173';
 
 export function normalizeLocalDelivery(input: LocalDelivery): LocalDelivery {
-  const baseUrl = input.baseUrl.trim().replace(/\/$/, '');
+  const baseUrl = input.baseUrl.trim();
   const client = input.client.trim();
   const credential = input.credential.trim();
   let parsed: URL;
   try { parsed = new URL(baseUrl); }
   catch { throw new Error('invalid_local_url'); }
-  if (parsed.origin !== LOCAL_VERA) throw new Error('unsupported_local_url');
+  const loopback = parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost';
+  if (parsed.protocol !== 'https:' && !(loopback && parsed.protocol === 'http:')) {
+    throw new Error('insecure_vera_url');
+  }
+  if (parsed.origin === GOVERNED_RELAY) throw new Error('relay_is_not_vera');
+  if (parsed.pathname !== '/' || parsed.search !== '' || parsed.hash !== '') {
+    throw new Error('invalid_vera_origin');
+  }
   if (client === '') throw new Error('missing_client');
   if (credential === '') throw new Error('missing_credential');
-  return { baseUrl, client, credential };
+  return { baseUrl: parsed.origin, client, credential };
 }
 
 export function normalizeRemoteDelivery(input: RemoteDelivery): RemoteDelivery {

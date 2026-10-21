@@ -20,6 +20,13 @@ const credential = document.querySelector<HTMLInputElement>('#credential')!;
 const status = document.querySelector<HTMLParagraphElement>('#status')!;
 const forget = document.querySelector<HTMLButtonElement>('#forget')!;
 
+async function authorizeVeraOrigin(target: { baseUrl: string }): Promise<void> {
+  const url = new URL(target.baseUrl);
+  if (url.protocol !== 'https:') return;
+  const granted = await browser.permissions.request({ origins: [`${url.origin}/*`] });
+  if (!granted) throw new Error('vera_origin_permission_denied');
+}
+
 const storedLocal = await getLocalDelivery();
 if (storedLocal) localAuthorization.value = JSON.stringify(storedLocal, null, 2);
 
@@ -38,6 +45,7 @@ localForm.addEventListener('submit', async event => {
       client: String(parsed.client ?? ''),
       credential: String(parsed.credential ?? ''),
     });
+    await authorizeVeraOrigin(target);
     await saveLocalDelivery(target);
     localAuthorization.value = JSON.stringify(target, null, 2);
     localStatus.textContent = 'Vera Clip puede depositar directamente en esta Vera.';

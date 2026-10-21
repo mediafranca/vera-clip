@@ -40,11 +40,11 @@ confirm.addEventListener('click', async () => {
   if (local) {
     try {
       if (await deliverLocally(pending, local)) {
-        status.textContent = 'Guardado directamente en tu Vera local.';
+        status.textContent = 'Guardado directamente en tu Vera.';
         await discardPreview();
         return;
       }
-    } catch { /* Vera local no está disponible: conservar abajo. */ }
+    } catch { /* La Vera directa no está disponible: conservar abajo. */ }
   }
   const remote = await getRemoteDelivery();
   if (remote) {

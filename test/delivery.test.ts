@@ -62,7 +62,7 @@ describe('capture delivery', () => {
 });
 
 describe('local destination configuration', () => {
-  it('accepts only the local Vera and trims the delegated capability', () => {
+  it('accepts loopback Vera and trims the delegated capability', () => {
     expect(normalizeLocalDelivery({
       baseUrl: ' http://127.0.0.1:4173/ ',
       client: ' vera-clip ',
@@ -74,10 +74,24 @@ describe('local destination configuration', () => {
     });
   });
 
-  it('does not turn a pasted URL into authority over another Vera', () => {
+  it('accepts a directly reachable Vera over HTTPS', () => {
+    expect(normalizeLocalDelivery({
+      baseUrl: 'https://vera.tuatara-carat.ts.net/', client: 'vera-clip', credential: 'secret',
+    })).toEqual({
+      baseUrl: 'https://vera.tuatara-carat.ts.net', client: 'vera-clip', credential: 'secret',
+    });
+  });
+
+  it('does not mistake Vera Conecta for a direct Vera', () => {
     expect(() => normalizeLocalDelivery({
-      baseUrl: 'https://vera.example', client: 'vera-clip', credential: 'secret',
-    })).toThrow('unsupported_local_url');
+      baseUrl: 'https://conecta.mediafranca.net', client: 'vera-clip', credential: 'secret',
+    })).toThrow('relay_is_not_vera');
+  });
+
+  it('rejects insecure non-local Vera URLs', () => {
+    expect(() => normalizeLocalDelivery({
+      baseUrl: 'http://vera.example', client: 'vera-clip', credential: 'secret',
+    })).toThrow('insecure_vera_url');
   });
 });
 

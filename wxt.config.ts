@@ -15,6 +15,9 @@ export default defineConfig({
       'http://localhost/*',
       'https://conecta.mediafranca.net/*',
     ],
+    ...(browser === 'firefox'
+      ? { optional_permissions: ['https://*/*'] }
+      : { optional_host_permissions: ['https://*/*'] }),
     action: {
       default_title: 'Capturar en Vera',
       default_icon: {
